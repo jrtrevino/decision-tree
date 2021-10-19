@@ -72,7 +72,6 @@ def select_splitting_attribute(dataframe, attributes, threshold):
         attribute_gain = {attribute: None}
         for key in attr_class_df:
             # key -> index for grouped attributes
-            # print(attr_df[key[0]].tolist())#  <- dataset length
             if key[0] not in attr_subset_size:
                 attr_subset_size[key[0]] = len(
                     attr_df[key[0]].tolist())
@@ -80,18 +79,14 @@ def select_splitting_attribute(dataframe, attributes, threshold):
                 attr_entropy[key[0]] = 0
             pr = len(attr_class_df[key]) / len(attr_df[key[0]])
             attr_entropy[key[0]] += (math.log2(pr) * (-pr))
-        # print(attribute, attr_subset_size)
-       #  print(attr_entropy, sum([size for size in attr_subset_size.values()]))
         # attribute gain calculation
         attribute_gain[attribute] = sum(
             [(attr_subset_size[key] / sum(attr_subset_size.values())) *
              attr_entropy[key] for key in attr_entropy])
         attributes_gain.append(
             {'attribute': attribute, 'gain': df_entropy - attribute_gain[attribute]})
-    # first item will have highest gain
     attributes_gain = sorted(
         attributes_gain, key=lambda d: d['gain'], reverse=True)
-    # print(attributes_gain)
     return attributes_gain[0]['attribute'] if attributes_gain[0]['gain'] > threshold else None
 
 # The heart of our classification.
@@ -103,15 +98,12 @@ def select_splitting_attribute(dataframe, attributes, threshold):
 
 
 def c45(dataframe, attributes, threshold, parent=False, file=None):
-    # print(attributes)
-    # attributes = attributes.copy()
     attr_copy = attributes.copy()
     node_label = None
     tree = {}
     if parent:
         # just to add our metadata for the tree
         tree['dataset'] = file
-        # tree['node'] = {}
     # check termination conditions 1 (if) & 2 (elif)
     if len(dataframe.groupby(attributes['class_label'])) == 1:
         # checks if all of the class labels are the same
@@ -132,7 +124,6 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
             dataframe, attributes, threshold)
         if not splitting_attribute:
             node_label = find_most_frequent_label(dataframe, attributes)
-            # print('No good splitting attribute, making leaf: {}'.format(node_label[0]))
             tree['leaf'] = {'decision': node_label[0], 'p': node_label[1]}
         else:
             seen_dom_val = {}
@@ -140,10 +131,8 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
             attr_df = dataframe.groupby([node_label]).groups
             attr_copy.pop(node_label, None)
             # filter attribute from attributes
-            # print(node_label)
             tree['node'] = {'var': node_label, 'edges': []}
             # grab all values for attribute in dataframe
-            # print(len(attr_df), len(attributes[splitting_attribute]))
             for key in attributes[node_label]:
                 filtered_df = dataframe.loc[dataframe[node_label] == key]
                 if len(filtered_df) > 0:
