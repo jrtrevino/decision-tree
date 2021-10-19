@@ -105,6 +105,7 @@ def select_splitting_attribute(dataframe, attributes, threshold):
 def c45(dataframe, attributes, threshold, parent=False, file=None):
     # print(attributes)
     # attributes = attributes.copy()
+    attr_copy = attributes.copy()
     node_label = None
     tree = {}
     if parent:
@@ -137,29 +138,26 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
             seen_dom_val = {}
             node_label = splitting_attribute
             attr_df = dataframe.groupby([node_label]).groups
-            attr_copy = attributes.copy()
+            attr_copy.pop(node_label, None)
             # filter attribute from attributes
-            attributes.pop(node_label, None)
             # print(node_label)
             tree['node'] = {'var': node_label, 'edges': []}
             # grab all values for attribute in dataframe
             # print(len(attr_df), len(attributes[splitting_attribute]))
-            for key in attr_df:
-                seen_dom_val[key] = True
+            for key in attributes[node_label]:
                 filtered_df = dataframe.loc[dataframe[node_label] == key]
-                tree['node']['edges'].append(
-                    {'edge': key,
-                     'value':  (c45(filtered_df, attributes.copy(), threshold))})
-            # append any missing domain values not found
-            for key in attr_copy[node_label]:
-                if key not in seen_dom_val:
-                    node_label = find_most_frequent_label(
-                        dataframe, attributes)
+                if len(filtered_df) > 0:
                     tree['node']['edges'].append(
-                        {'edge': key,
-                         'value':  {
-                             'leaf': {
-                                 'decision': node_label[0], 'p': node_label[1]}}})
+                        {
+                            'edge': key,
+                            'value':  (c45(filtered_df, attr_copy, threshold))})
+                else:
+                    freq_label = find_most_frequent_label(
+                        dataframe, attributes)
+                    tree['node']['edges'].append({
+                        'edge': key,
+                        'value': {'leaf': {'decision': freq_label[0], 'p': freq_label[1]}}})
+
     return tree
 
 # Our wrapper to create a c45 decision tree. Requires a path to our dataset and

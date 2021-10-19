@@ -17,12 +17,12 @@ def classify_df(df, attr, tree, matrix, indices):
             num_correct += 1
         else:
             num_incorrect += 1
-        print(pred, pred in indices)
+        # print(pred, pred in indices)
         #print(indices[row[attr['class_label']]], indices[pred])
         matrix[indices[row[attr['class_label']]]][indices[pred]] += 1
         # matrix[row][col] implies matrix[actual][pred]
-        print("Row index: {}, predicted label: {}, actual: {}".format(
-            index, pred, row[attr['class_label']]))
+        # print("Row index: {}, predicted label: {}, actual: {}".format(
+        # index, pred, row[attr['class_label']]))
     metrics = {
         'Classified': num_correct + num_incorrect,
         'Correct': num_correct,
@@ -66,8 +66,8 @@ def classify_wrapper(data_path, tree_path):
                 num_incorrect += 1
             matrix[indices[row[attr['class_label']]]][indices[pred]] += 1
             # matrix[row][col] implies matrix[actual][pred]
-            print("Row index: {}, predicted label: {}, actual: {}".format(
-                index, pred, row[attr['class_label']]))
+            # print("Row index: {}, predicted label: {}, actual: {}".format(
+            # index, pred, row[attr['class_label']]))
         metrics = {
             'Classified': num_correct + num_incorrect,
             'Correct': num_correct,
@@ -90,7 +90,7 @@ def display_metrics(metrics):
     print("Matrix headers: Pred(column) vs Actual(row)")
     print(
         "Header values/indices for rows & columns: {}\n".format(metrics['Indices']))
-    print(metrics['Matrix'])
+    print(metrics['Matrix'], "\n")
 
 
 def csv_to_df(path):
