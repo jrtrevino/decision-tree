@@ -17,6 +17,12 @@ def csv_to_df(path):
     attributes = df.iloc[0].to_dict()
     attributes['class_label'] = df.iloc[1][0]
     df = df.drop([0, 1])
+    # replace values of attributes dict with possible values
+    for key in attributes.copy():
+        if key == 'class_label':
+            continue
+        val = df[key].unique()
+        attributes[key] = val
     return df, attributes
 
 # Requires a pandas dataframe and a dictionary object containing our
@@ -97,6 +103,8 @@ def select_splitting_attribute(dataframe, attributes, threshold):
 
 
 def c45(dataframe, attributes, threshold, parent=False, file=None):
+    # print(attributes)
+    # attributes = attributes.copy()
     node_label = None
     tree = {}
     if parent:
@@ -108,40 +116,50 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
         # checks if all of the class labels are the same
         node_label = list(dataframe.groupby(
             [attributes['class_label']]).groups)[0]
-        # print('All the same class label: {} for class {}'.format(node_label, attributes['class_label']))
+
         tree['leaf'] = {'decision': node_label, 'p': 1.0}
 
     elif len(attributes) == 1:
         # we choose 1 instead of 0 in condition check because we have the class
         # label inside of our attributes dictionary, but this wont ever get removed.
-        print('Find most frequent label')
+        # print('Find most frequent label')
         node_label = find_most_frequent_label(dataframe, attributes)
         tree['leaf'] = {'decision': node_label[0], 'p': node_label[1]}
     else:
         # determine splitting attribute
         splitting_attribute = select_splitting_attribute(
             dataframe, attributes, threshold)
-        # print(splitting_attribute)
         if not splitting_attribute:
             node_label = find_most_frequent_label(dataframe, attributes)
             # print('No good splitting attribute, making leaf: {}'.format(node_label[0]))
             tree['leaf'] = {'decision': node_label[0], 'p': node_label[1]}
         else:
+            seen_dom_val = {}
             node_label = splitting_attribute
+            attr_df = dataframe.groupby([node_label]).groups
+            attr_copy = attributes.copy()
             # filter attribute from attributes
             attributes.pop(node_label, None)
             # print(node_label)
             tree['node'] = {'var': node_label, 'edges': []}
             # grab all values for attribute in dataframe
-            attr_df = dataframe.groupby([node_label]).groups
+            # print(len(attr_df), len(attributes[splitting_attribute]))
             for key in attr_df:
+                seen_dom_val[key] = True
                 filtered_df = dataframe.loc[dataframe[node_label] == key]
-                # print(len(filtered_df))
-                # print(filtered_df)
-                # print("Creating Edge: {}, Node: {}".format(key, node_label))
                 tree['node']['edges'].append(
                     {'edge': key,
-                     'value':  (c45(filtered_df, attributes, threshold))})
+                     'value':  (c45(filtered_df, attributes.copy(), threshold))})
+            # append any missing domain values not found
+            for key in attr_copy[node_label]:
+                if key not in seen_dom_val:
+                    node_label = find_most_frequent_label(
+                        dataframe, attributes)
+                    tree['node']['edges'].append(
+                        {'edge': key,
+                         'value':  {
+                             'leaf': {
+                                 'decision': node_label[0], 'p': node_label[1]}}})
     return tree
 
 # Our wrapper to create a c45 decision tree. Requires a path to our dataset and
@@ -150,7 +168,7 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
 
 def induce_c45(data_path, restrictions_path=None):
     df, attributes = csv_to_df(data_path)
-    tree = c45(df, attributes, 0.10, True, data_path)
+    tree = c45(df, attributes, 0.1, True, data_path)
     print(json.dumps(tree, indent=2))
     return tree
 
