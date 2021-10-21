@@ -1,6 +1,7 @@
 import sys
+import json
 from pandas import concat
-from Classifier import classify_df
+from Classifier import classify_df, classify_wrapper
 from Classifier import gen_confusion_matrix
 from induceC45 import c45
 from induceC45 import csv_to_df as to_df
@@ -9,6 +10,10 @@ from induceC45 import csv_to_df as to_df
 def wrapper(n_slices, data_path):
     # step 1: partition dataset
     df, attr = to_df(data_path)
+    if n_slices == 0 or n_slices == 1:
+        tree = c45(df, attr, 0.3, True, data_path)
+        print(json.dumps(tree, indent=2))
+        sys.exit(0)
     df_partitions = sample_df(
         n_slices, df) if n_slices >= 0 else None
     # gen confusion matrix for full dataset
@@ -31,6 +36,7 @@ def wrapper(n_slices, data_path):
                 overall_matrix[i] = [a+b for a,
                                      b in zip(results['Matrix'][i], overall_matrix[i])]
     else:
+
         for i in range(len(df)):
             training_df = df.copy()
             holdout = df.sample(n=1)
@@ -82,5 +88,7 @@ if __name__ == "__main__":
     except:
         print("Argument 2 should be an integer")
         sys.exit(-1)
+    if (int(args[1])) == 0 or (int(args[1])) == 1:
+        print("Fold of size 0 or 1 detected. Running Classifier.py")
     print("Beginning Evaluation!")
     wrapper(int(args[1]), args[0])

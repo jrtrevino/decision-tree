@@ -7,8 +7,8 @@ import sys
 
 def classify_df(df, attr, tree, matrix, indices):
     num_correct = num_incorrect = accuracy = 0
-    print("Training set detected. Class label: {}".format(
-        attr['class_label']))
+    # print("Training set detected. Class label: {}".format(
+    # attr['class_label']))
     #print("Creating confusion matrix for this dataset\n")
     #matrix, indices = gen_confusion_matrix(df, attr)
     for index, row in df.iterrows():
@@ -127,9 +127,8 @@ def bfs(row, tree):
         # print(tree['node']['edges'])
         for obj in tree['node']['edges']:
             # search through edges and match the attribute
-            if attr_val == obj['edge']:
-                # print('Match found')
-                next_tree = obj['value']
+            if attr_val == obj['edge']['value']:
+                next_tree = obj['edge']
                 return bfs(row, next_tree)
 
 

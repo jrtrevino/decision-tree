@@ -15,12 +15,15 @@ import sys
 def csv_to_df(path):
     df = pd.read_csv(path, header=0)  # , skiprows=[2])
     attributes = df.iloc[0].to_dict()
+    print(attributes)
     attributes['class_label'] = df.iloc[1][0]
     df = df.drop([0, 1])
     # replace values of attributes dict with possible values
     for key in attributes.copy():
         if key == 'class_label':
             continue
+        elif type(attributes[key]) is str:
+            print('str')
         val = df[key].unique()
         attributes[key] = val
     return df, attributes
@@ -126,9 +129,8 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
             node_label = find_most_frequent_label(dataframe, attributes)
             tree['leaf'] = {'decision': node_label[0], 'p': node_label[1]}
         else:
-            seen_dom_val = {}
             node_label = splitting_attribute
-            attr_df = dataframe.groupby([node_label]).groups
+            # attr_df = dataframe.groupby([node_label]).groups
             attr_copy.pop(node_label, None)
             # filter attribute from attributes
             tree['node'] = {'var': node_label, 'edges': []}
@@ -136,17 +138,19 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
             for key in attributes[node_label]:
                 filtered_df = dataframe.loc[dataframe[node_label] == key]
                 if len(filtered_df) > 0:
+                    val = (c45(filtered_df, attr_copy, threshold))
+                    if 'node' in val:
+                        result_label = 'node'
+                    else:
+                        result_label = 'leaf'
                     tree['node']['edges'].append(
                         {
-                            'edge': key,
-                            'value':  (c45(filtered_df, attr_copy, threshold))})
+                            'edge': {'value': key, result_label: val[result_label]}})
                 else:
                     freq_label = find_most_frequent_label(
                         dataframe, attributes)
                     tree['node']['edges'].append({
-                        'edge': key,
-                        'value': {'leaf': {'decision': freq_label[0], 'p': freq_label[1]}}})
-
+                        'edge': {'value': key, 'leaf': {'decision': freq_label[0], 'p': freq_label[1]}}})
     return tree
 
 # Our wrapper to create a c45 decision tree. Requires a path to our dataset and
@@ -155,7 +159,7 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
 
 def induce_c45(data_path, restrictions_path=None):
     df, attributes = csv_to_df(data_path)
-    tree = c45(df, attributes, 0.1, True, data_path)
+    tree = c45(df, attributes, 1, True, data_path)
     print(json.dumps(tree, indent=2))
     return tree
 
