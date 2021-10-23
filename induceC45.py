@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import math  # for log calculation
 import json
@@ -15,16 +16,17 @@ import sys
 def csv_to_df(path):
     df = pd.read_csv(path, header=0)  # , skiprows=[2])
     attributes = df.iloc[0].to_dict()
-    print(attributes)
     attributes['class_label'] = df.iloc[1][0]
     df = df.drop([0, 1])
     # replace values of attributes dict with possible values
     for key in attributes.copy():
         if key == 'class_label':
             continue
-        elif type(attributes[key]) is str:
-            print('str')
-        val = df[key].unique()
+        # check if value isn't numerical
+        if int(attributes[key]) != 0:
+            val = df[key].unique()
+        else:
+            val = "num"
         attributes[key] = val
     return df, attributes
 
@@ -64,33 +66,54 @@ def select_splitting_attribute(dataframe, attributes, threshold):
         # skip our class label -> it's not an attribute
         if attribute == attributes['class_label']:
             continue
-        # for grabbing subset size for later
-        attr_df = dataframe.groupby([attribute]).groups
-        # group by labels in an attribute by the class label
-        attr_class_df = dataframe.groupby(
-            [attribute, attributes['class_label']]).groups
-        attr_entropy = {}
-        attr_subset_size = {}
-        # will contain the gain for the attribute to append to attributes_gain array
-        attribute_gain = {attribute: None}
-        for key in attr_class_df:
-            # key -> index for grouped attributes
-            if key[0] not in attr_subset_size:
-                attr_subset_size[key[0]] = len(
-                    attr_df[key[0]].tolist())
-            if key[0] not in attr_entropy:
-                attr_entropy[key[0]] = 0
-            pr = len(attr_class_df[key]) / len(attr_df[key[0]])
-            attr_entropy[key[0]] += (math.log2(pr) * (-pr))
-        # attribute gain calculation
-        attribute_gain[attribute] = sum(
-            [(attr_subset_size[key] / sum(attr_subset_size.values())) *
-             attr_entropy[key] for key in attr_entropy])
-        attributes_gain.append(
-            {'attribute': attribute, 'gain': df_entropy - attribute_gain[attribute]})
+        elif attribute not in attributes:
+            # weird base case I encountered
+            continue
+        # check if attribute is categorical
+        if type(attributes[attribute]) is np.ndarray:
+            # for grabbing subset size for later
+            attr_df = dataframe.groupby([attribute]).groups
+            # group by labels in an attribute by the class label
+            attr_class_df = dataframe.groupby(
+                [attribute, attributes['class_label']]).groups
+            attr_entropy = {}
+            attr_subset_size = {}
+            # will contain the gain for the attribute to append to attributes_gain array
+            attribute_gain = {attribute: None}
+            for key in attr_class_df:
+                # key -> index for grouped attributes
+                if key[0] not in attr_subset_size:
+                    attr_subset_size[key[0]] = len(
+                        attr_df[key[0]].tolist())
+                if key[0] not in attr_entropy:
+                    attr_entropy[key[0]] = 0
+                pr = len(attr_class_df[key]) / len(attr_df[key[0]])
+                attr_entropy[key[0]] += (math.log2(pr) * (-pr))
+            # attribute gain calculation
+            attribute_gain[attribute] = sum(
+                [(attr_subset_size[key] / sum(attr_subset_size.values())) *
+                 attr_entropy[key] for key in attr_entropy])
+            attributes_gain.append(
+                {'attribute': attribute, 'gain': df_entropy - attribute_gain[attribute]})
+        else:
+            num_gain = find_best_split(
+                dataframe, attributes, attribute, df_entropy)
+            attributes_gain.append(
+                {'attribute': attribute, 'gain': num_gain[1], 'split': num_gain[0]})
     attributes_gain = sorted(
         attributes_gain, key=lambda d: d['gain'], reverse=True)
-    return attributes_gain[0]['attribute'] if attributes_gain[0]['gain'] > threshold else None
+    return attributes_gain[0] if (len(attributes_gain) > 0 and attributes_gain[0]['gain'] > threshold) else None
+
+
+# Determines the information gain for a numerical attribute.
+# Calculates the best value to split on and returns the
+# gain and value to split on.
+def find_best_split(dataframe, attributes, num_attribute, df_entropy):
+    # TODO: calculate best split for the given attribute num_attribute
+    # Return value should be an array A where:
+    #   A[0] = splitting value
+    #   A[1] = information gain for splitting the dataset on that value
+    return [0, 0, 0]
 
 # The heart of our classification.
 # Returns a classification tree as a dictionary.
@@ -107,50 +130,65 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
     if parent:
         # just to add our metadata for the tree
         tree['dataset'] = file
-    # check termination conditions 1 (if) & 2 (elif)
+    # check termination conditions 1
     if len(dataframe.groupby(attributes['class_label'])) == 1:
-        # checks if all of the class labels are the same
+        #print('leaf created: same class label')
         node_label = list(dataframe.groupby(
             [attributes['class_label']]).groups)[0]
-
         tree['leaf'] = {'decision': node_label, 'p': 1.0}
-
+    # check termination condition 2
     elif len(attributes) == 1:
-        # we choose 1 instead of 0 in condition check because we have the class
-        # label inside of our attributes dictionary, but this wont ever get removed.
-        # print('Find most frequent label')
+        #print('leaf created: no more attributes')
         node_label = find_most_frequent_label(dataframe, attributes)
         tree['leaf'] = {'decision': node_label[0], 'p': node_label[1]}
     else:
         # determine splitting attribute
         splitting_attribute = select_splitting_attribute(
             dataframe, attributes, threshold)
+        # check if we don't have an attribute higher than our threshold
         if not splitting_attribute:
+            #print('leaf created: not high enough gain')
             node_label = find_most_frequent_label(dataframe, attributes)
             tree['leaf'] = {'decision': node_label[0], 'p': node_label[1]}
+        # split on the attribute
         else:
-            node_label = splitting_attribute
-            # attr_df = dataframe.groupby([node_label]).groups
-            attr_copy.pop(node_label, None)
-            # filter attribute from attributes
-            tree['node'] = {'var': node_label, 'edges': []}
-            # grab all values for attribute in dataframe
-            for key in attributes[node_label]:
-                filtered_df = dataframe.loc[dataframe[node_label] == key]
-                if len(filtered_df) > 0:
-                    val = (c45(filtered_df, attr_copy, threshold))
-                    if 'node' in val:
-                        result_label = 'node'
+            #print('creating node!')
+            node_label = splitting_attribute['attribute']
+            # Split numerical category if applicable
+            if 'split' in splitting_attribute:
+                # print("Returned attribute: {}".format(splitting_attribute))
+                tree['node'] = {'var': node_label, 'edges': []}
+                df_l = dataframe[dataframe[node_label].astype(float) <=
+                                 float(splitting_attribute['split'])]
+                df_r = dataframe[dataframe[node_label].astype(float) >
+                                 float(splitting_attribute['split'])]
+                l_tree = c45(df_l, attr_copy, threshold)
+                l_val = 'leaf' if 'leaf' in l_tree else 'node'
+                tree['node']['edges'].append(
+                    {'value': splitting_attribute['split'], 'direction': 'le', l_val: l_tree[l_val]})
+                r_tree = c45(df_r, attr_copy, threshold)
+                r_val = 'leaf' if 'leaf' in r_tree else 'node'
+                tree['node']['edges'].append(
+                    {'value': splitting_attribute['split'], 'direction': 'gt', r_val: r_tree[r_val]})
+            # Split categorical attribute if applicable
+            else:
+                attr_copy.pop(node_label, None)
+                tree['node'] = {'var': node_label, 'edges': []}
+                for key in attributes[node_label]:
+                    filtered_df = dataframe.loc[dataframe[node_label] == key]
+                    if len(filtered_df) > 0:
+                        val = (c45(filtered_df, attr_copy, threshold))
+                        result_label = 'node' if 'node' in val else 'leaf'
+                        tree['node']['edges'].append(
+                            {
+                                'edge': {
+                                    'value': key, result_label: val[result_label]}})
+                    # handle ghost leaf
                     else:
-                        result_label = 'leaf'
-                    tree['node']['edges'].append(
-                        {
-                            'edge': {'value': key, result_label: val[result_label]}})
-                else:
-                    freq_label = find_most_frequent_label(
-                        dataframe, attributes)
-                    tree['node']['edges'].append({
-                        'edge': {'value': key, 'leaf': {'decision': freq_label[0], 'p': freq_label[1]}}})
+                        freq_label = find_most_frequent_label(
+                            dataframe, attributes)
+                        tree['node']['edges'].append({
+                            'edge': {'value': key, 'leaf': {'decision': freq_label[0], 'p': freq_label[1]}}})
     return tree
 
 # Our wrapper to create a c45 decision tree. Requires a path to our dataset and
@@ -159,7 +197,8 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
 
 def induce_c45(data_path, restrictions_path=None):
     df, attributes = csv_to_df(data_path)
-    tree = c45(df, attributes, 1, True, data_path)
+    # print('df created')
+    tree = c45(df, attributes, 0.3, True, data_path)
     print(json.dumps(tree, indent=2))
     return tree
 

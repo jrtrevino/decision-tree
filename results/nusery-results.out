@@ -1,0 +1,70 @@
+Beginning Evaluation!
+Generating Confusion Matrix
+
+Total classified: 2592
+Total correctly classified: 2120
+Total incorrectly classified: 472
+Accuracy: 81.79%
+Error rate: 18.21%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'not_recom': 0, 'priority': 1, 'recommend': 2, 'spec_prior': 3, 'very_recom': 4}
+
+[[874, 0, 0, 0, 0], [0, 723, 0, 78, 0], [0, 0, 0, 0, 0], [0, 328, 0, 523, 0], [0, 66, 0, 0, 0]] 
+
+
+Total classified: 2592
+Total correctly classified: 2291
+Total incorrectly classified: 301
+Accuracy: 88.39%
+Error rate: 11.61%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'not_recom': 0, 'priority': 1, 'recommend': 2, 'spec_prior': 3, 'very_recom': 4}
+
+[[1715, 0, 0, 0, 0], [0, 1374, 0, 281, 0], [0, 0, 0, 0, 0], [0, 355, 0, 1322, 0], [0, 137, 0, 0, 0]] 
+
+
+Total classified: 2592
+Total correctly classified: 2298
+Total incorrectly classified: 294
+Accuracy: 88.66%
+Error rate: 11.34%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'not_recom': 0, 'priority': 1, 'recommend': 2, 'spec_prior': 3, 'very_recom': 4}
+
+[[2594, 0, 0, 0, 0], [0, 2032, 0, 493, 0], [0, 0, 0, 0, 0], [0, 379, 0, 2083, 0], [0, 195, 0, 0, 0]] 
+
+
+Total classified: 2592
+Total correctly classified: 2257
+Total incorrectly classified: 335
+Accuracy: 87.08%
+Error rate: 12.92%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'not_recom': 0, 'priority': 1, 'recommend': 2, 'spec_prior': 3, 'very_recom': 4}
+
+[[3462, 0, 0, 0, 0], [0, 2612, 0, 724, 0], [0, 0, 0, 0, 0], [0, 413, 0, 2892, 0], [0, 265, 0, 0, 0]] 
+
+
+Total classified: 2592
+Total correctly classified: 2269
+Total incorrectly classified: 323
+Accuracy: 87.54%
+Error rate: 12.46%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'not_recom': 0, 'priority': 1, 'recommend': 2, 'spec_prior': 3, 'very_recom': 4}
+
+[[4330, 0, 0, 0, 0], [0, 3240, 0, 950, 0], [0, 1, 0, 0, 0], [0, 435, 0, 3665, 0], [0, 339, 0, 0, 0]] 
+
+Overall Accuracy: 86.69%
+Overall Error Rate: 13.31%
+Overall confusion Matrix: [[12975, 0, 0, 0, 0], [0, 9981, 0, 2526, 0], [0, 1, 0, 0, 0], [0, 1910, 0, 10485, 0], [0, 1002, 0, 0, 0]]

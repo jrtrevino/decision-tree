@@ -1,0 +1,70 @@
+Beginning Evaluation!
+Generating Confusion Matrix
+
+Total classified: 4
+Total correctly classified: 4
+Total incorrectly classified: 0
+Accuracy: 100.00%
+Error rate: 0.00%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'F': 0, 'T': 1}
+
+[[4, 0], [0, 0]] 
+
+
+Total classified: 4
+Total correctly classified: 4
+Total incorrectly classified: 0
+Accuracy: 100.00%
+Error rate: 0.00%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'F': 0, 'T': 1}
+
+[[8, 0], [0, 0]] 
+
+
+Total classified: 4
+Total correctly classified: 3
+Total incorrectly classified: 1
+Accuracy: 75.00%
+Error rate: 25.00%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'F': 0, 'T': 1}
+
+[[9, 1], [0, 2]] 
+
+
+Total classified: 4
+Total correctly classified: 4
+Total incorrectly classified: 0
+Accuracy: 100.00%
+Error rate: 0.00%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'F': 0, 'T': 1}
+
+[[11, 1], [0, 4]] 
+
+
+Total classified: 4
+Total correctly classified: 4
+Total incorrectly classified: 0
+Accuracy: 100.00%
+Error rate: 0.00%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'F': 0, 'T': 1}
+
+[[12, 1], [0, 7]] 
+
+Overall Accuracy: 95.00%
+Overall Error Rate: 5.00%
+Overall confusion Matrix: [[44, 3], [0, 13]]

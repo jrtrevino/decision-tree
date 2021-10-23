@@ -1,0 +1,70 @@
+Beginning Evaluation!
+Generating Confusion Matrix
+
+Total classified: 1625
+Total correctly classified: 1605
+Total incorrectly classified: 20
+Accuracy: 98.77%
+Error rate: 1.23%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'e': 0, 'p': 1}
+
+[[808, 0], [20, 797]] 
+
+
+Total classified: 1625
+Total correctly classified: 1602
+Total incorrectly classified: 23
+Accuracy: 98.58%
+Error rate: 1.42%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'e': 0, 'p': 1}
+
+[[1690, 0], [43, 1517]] 
+
+
+Total classified: 1625
+Total correctly classified: 1603
+Total incorrectly classified: 22
+Accuracy: 98.65%
+Error rate: 1.35%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'e': 0, 'p': 1}
+
+[[2523, 0], [65, 2287]] 
+
+
+Total classified: 1625
+Total correctly classified: 1599
+Total incorrectly classified: 26
+Accuracy: 98.40%
+Error rate: 1.60%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'e': 0, 'p': 1}
+
+[[3361, 0], [91, 3048]] 
+
+
+Total classified: 1625
+Total correctly classified: 1603
+Total incorrectly classified: 22
+Accuracy: 98.65%
+Error rate: 1.35%
+
+Printing Confusion Matrix
+Matrix headers: Pred(column) vs Actual(row)
+Header values/indices for rows & columns: {'e': 0, 'p': 1}
+
+[[4230, 0], [113, 3782]] 
+
+Overall Accuracy: 98.61%
+Overall Error Rate: 1.39%
+Overall confusion Matrix: [[12612, 0], [332, 11431]]

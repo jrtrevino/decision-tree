@@ -1,0 +1,5 @@
+Beginning Evaluation!
+Generating Confusion Matrix
+Overall Accuracy: 98.95%
+Overall Error Rate: 1.05%
+Overall confusion Matrix: [[13054, 0, 0, 0, 0], [0, 12497, 0, 118, 109], [0, 0, 4, 0, 1], [0, 100, 0, 12090, 0], [0, 82, 0, 0, 825]]
