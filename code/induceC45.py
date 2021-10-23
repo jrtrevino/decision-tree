@@ -113,7 +113,7 @@ def find_best_split(dataframe, attributes, num_attribute, df_entropy):
     # Return value should be an array A where:
     #   A[0] = splitting value
     #   A[1] = information gain for splitting the dataset on that value
-    return [0, 0, 0]
+    return [0, 0]
 
 # The heart of our classification.
 # Returns a classification tree as a dictionary.
