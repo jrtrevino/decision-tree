@@ -27,6 +27,8 @@ def csv_to_df(path):
             val = df[key].unique()
         else:
             val = "num"
+            # force non-numeric values in numeric columns to float
+            df[key] = pd.to_numeric(df[key], errors='coerce')
         attributes[key] = val
     return df, attributes
 
@@ -40,14 +42,11 @@ def csv_to_df(path):
 
 
 def find_most_frequent_label(dataframe, attributes):
-    label = value = attribute = None
-    values = dataframe[attributes['class_label']].value_counts()
-    keys = values.index.tolist()
-    for i in range(len(values)):
-        if value is None or values[i] > value:
-            label = keys[i]
-            value = values[i]
-    return [label, value/len(dataframe)]
+    values = dataframe[attributes['class_label']
+                       ].value_counts().keys().tolist()
+    counts = dataframe[attributes['class_label']
+                       ].value_counts().tolist()
+    return [values[0], counts[0]/len(dataframe)]
 
 # Determines which attribute to split on. Requires a pandas
 # dataframe, a dictionary of attributes, and a float value containing
@@ -158,9 +157,9 @@ def c45(dataframe, attributes, threshold, parent=False, file=None):
             if 'split' in splitting_attribute:
                 # print("Returned attribute: {}".format(splitting_attribute))
                 tree['node'] = {'var': node_label, 'edges': []}
-                df_l = dataframe[dataframe[node_label].astype(float) <=
+                df_l = dataframe[dataframe[node_label] <=
                                  float(splitting_attribute['split'])]
-                df_r = dataframe[dataframe[node_label].astype(float) >
+                df_r = dataframe[dataframe[node_label] >
                                  float(splitting_attribute['split'])]
                 l_tree = c45(df_l, attr_copy, threshold)
                 l_val = 'leaf' if 'leaf' in l_tree else 'node'
